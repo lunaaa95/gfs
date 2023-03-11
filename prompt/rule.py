@@ -15,9 +15,9 @@ class PromptRule:
 
 
 class TrendRule(PromptRule):
-    name = '价格趋势'
+    name = '价格'
     states = {
-        0: '下降',
+        0: '下跌',
         1: '上涨',
         2: '震荡'
     }

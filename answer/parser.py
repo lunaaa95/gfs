@@ -1,22 +1,30 @@
 import re
 import spacy
 
+from typing import Dict
+from abc import ABCMeta
 
-class NeatAnswerParser:
-    pattern = re.compile('价格趋势是(?P<trend>\w+)，波动率是(?P<volatility>\w+)，交易活跃程度是(?P<active>\w+)。')
-    keys = [
-        'trend',
-        'volatility',
-        'active'
-    ]
+
+class AnswerParser(metaclass=ABCMeta):
+    def parse(self, answer_sentence) -> Dict[str, str]:
+        return {'attribute': 'state'}
+
+
+class NeatAnswerParser(AnswerParser):
+    def __init__(self) -> None:
+        pattern = re.compile('价格趋势是(?P<trend>\w+)，波动率是(?P<volatility>\w+)，交易活跃程度是(?P<active>\w+)。')
+        keys = [
+            'trend',
+            'volatility',
+            'active'
+        ]
     
-    @classmethod
-    def parse(cls, answer_string):
-        matches = cls.pattern.search(answer_string)
-        return {k: matches.group(k) for k in cls.keys} if matches else None
+    def parse(self, answer_sentence):
+        matches = self.pattern.search(answer_sentence)
+        return {k: matches.group(k) for k in self.keys} if matches else None
 
 
-class GeneralAnswerParser:
+class GeneralAnswerParser(AnswerParser):
     """基于依存分析,解析gpt的回答
     """
 
@@ -41,6 +49,8 @@ class GeneralAnswerParser:
 
         answer_sentence = answer_sentence.replace('，', '\n')
         answer_sentence = answer_sentence.replace('。', '\n')
+        answer_sentence = answer_sentence.replace(',', '\n')
+        answer_sentence = answer_sentence.replace('.', '\n')
 
         all_sentences = []
         temp = answer_sentence.split('\n')

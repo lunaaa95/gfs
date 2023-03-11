@@ -9,7 +9,7 @@ from chinese_calendar import get_holidays
 from datetime import datetime as dt
 
 
-class PromptFactory:
+class PromptInformation:
     prompt_rules = {
             'trend': TrendRule,
             'volatility': VolatilityRule,
@@ -121,5 +121,5 @@ class PromptFactory:
 
 
 __all__ = [
-    PromptFactory
+    PromptInformation
 ]
