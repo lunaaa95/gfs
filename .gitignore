@@ -1,0 +1,11 @@
+cache
+runs
+dataset
+__pycache__/
+test_data
+*.csv
+*.pkl
+*.ipynb
+.vscode
+.ipynb_checkpoints
+*.npz
