@@ -1,9 +1,6 @@
 import pandas as pd
 from tqdm import trange
-from answer.parser import GeneralAnswerParser
 import numpy as np
-
-from prompt.rule import TrendRule, VolatilityRule, ActiveLevelRule
 
 
 ugly = {
@@ -30,7 +27,6 @@ polar = ugly
 
 if __name__ == '__main__':
     answer = pd.read_csv('simple_answers_2022_1.csv')
-    parser = GeneralAnswerParser(rules=[TrendRule, VolatilityRule, ActiveLevelRule])
 
     target = answer[['target_trend', 'target_volatility', 'target_active_level']]
     target = target.applymap(lambda x: polar[x]).to_numpy()

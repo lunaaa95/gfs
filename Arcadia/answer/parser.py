@@ -12,8 +12,8 @@ class AnswerParser(metaclass=ABCMeta):
 
 class NeatAnswerParser(AnswerParser):
     def __init__(self) -> None:
-        pattern = re.compile('价格趋势是(?P<trend>\w+)，波动率是(?P<volatility>\w+)，交易活跃程度是(?P<active>\w+)。')
-        keys = [
+        self.pattern = re.compile('价格趋势是(?P<trend>\w+)，波动率是(?P<volatility>\w+)，交易活跃程度是(?P<active>\w+)。')
+        self.keys = [
             'trend',
             'volatility',
             'active'
@@ -88,3 +88,27 @@ class GeneralAnswerParser(AnswerParser):
                     return bowl
         
         return bowl
+
+
+class CoTAnswerParser(AnswerParser):
+    def __init__(self) -> None:
+        self.first_p = re.compile(r'总结.+')
+        self.attributes = {
+            'trend': '价格',
+            'volatility': '波动率',
+            'active_level': '交易活跃程度'
+        }
+        self.ps = {k: re.compile(f'\[{attribute}(?P<state>\w+)\]') for k, attribute in self.attributes.items()}
+    
+    def parse(self, answer_sentence):
+        answer_sentence = answer_sentence.replace(' ', '')
+        answer_sentence = self.first_p.search(answer_sentence)
+        if answer_sentence is None:
+            return {k: '无法判断' for k in self.attributes.keys()}
+        else:
+            answer_sentence = answer_sentence.group()
+            results = {}
+            for k, p in self.ps.items():
+                m = p.search(answer_sentence)
+                results[k] = m.group('state') if m else '无法判断'
+            return results

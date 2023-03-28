@@ -1,10 +1,11 @@
 from langchain.chains.base import Chain
 from langchain.chains import LLMChain
+import tiktoken
 
 from typing import List, Dict
 
-from answer.parser import AnswerParser
-from prompt.template import news_predict_prompt, news_summary_prompt
+from ..answer.parser import AnswerParser
+from ..prompt.template import news_predict_prompt, news_summary_prompt
 
 
 def chain_factory(llm, answer_parser):
@@ -12,6 +13,13 @@ def chain_factory(llm, answer_parser):
     npc = NewsPredictChain(chain=LLMChain(prompt=news_predict_prompt, llm=llm))
     fpc = FullPredictionChain(news_summary_chain=nsc, news_predict_chain=npc, answer_parser=answer_parser)
     return fpc
+
+
+def num_tokens_from_string(string: str, encoding_name: str='cl100k_base') -> int:
+    """Returns the number of tokens in a text string."""
+    encoding = tiktoken.get_encoding(encoding_name)
+    num_tokens = len(encoding.encode(string))
+    return num_tokens
 
 
 class NewsSummaryChain(Chain):
@@ -27,7 +35,15 @@ class NewsSummaryChain(Chain):
     
     def _call(self, inputs: Dict[str, str]) -> Dict[str, str]:
         paragraphs = inputs['body'].split('\n')
-        preceding = inputs['title']
+        preceding = inputs['title'] + '.'
+
+        for i, p in enumerate(paragraphs):
+            if num_tokens_from_string(p) > 3000:
+                p = p.replace('.', '。')
+                ps = p.split('。')
+                paragraphs[i] = '。'.join(ps[len(ps)//2:])
+                paragraphs.insert(i, '。'.join(ps[:len(ps)//2]))
+
         for p in paragraphs:
             p = p.replace('  ', '').replace('\t', '')
             preceding += self.chain.run(preceding=preceding, reading=p)
@@ -61,7 +77,7 @@ class FullPredictionChain(Chain):
 
     @property
     def output_keys(self) -> List[str]:
-        return ['prediction']
+        return ['output']
     
     def _call(self, inputs: Dict[str, str]) -> Dict[str, str]:
         news = self.news_summary_chain.run({
@@ -75,4 +91,4 @@ class FullPredictionChain(Chain):
             'news': news
         })
         output = self.answer_parser.parse(raw_output)
-        return {'prediction': output}
+        return {'output': {'raw_output': raw_output, 'prediction': output}}

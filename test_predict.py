@@ -4,8 +4,8 @@ os.environ['https_proxy'] = 'http://10.177.27.237:7890'
 
 from langchain.llms import OpenAI
 from langchain.chains import LLMChain
-from prompt.chain import NewsPredictChain
-from prompt.template import news_predict_prompt
+from Arcadia.chain.chain import NewsPredictChain
+from Arcadia.prompt.template import news_predict_prompt
 api_key = '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'
 
 
@@ -15,10 +15,15 @@ if __name__ == '__main__':
 
     npc = NewsPredictChain(chain=llm_chain)
 
-    trend = '下跌'
-    volatility = '高'
-    active_level = '低'
-    news = '金融精准发力，服务质效不断提升，赋能实体经济成效显著。在助力科技自立自强方面，试点注册制以来，资本市场对科技创新的服务功能进一步增强，资本“活水”加速流入科技创新行业。'
+    trend = '震荡'
+    volatility = '低'
+    active_level = '中等'
+    news = '汉钟精机:涡旋压缩机明年逐渐量产.汉钟精机计划明年开始逐渐量产涡旋压缩机，首先推出空气产品，然后陆续推出制冷、冷冻等方面的产品，产能将根据市场需求而定。公司主要从事压缩机应用技术的研制开发、生产销售及售后服务。'
+
+    # trend = '震荡'
+    # volatility = '低'
+    # active_level = '低'
+    # news = '安信信托预计上半年净利润同比增长约65%.安信信托发布上半年业绩预告，预计净利润同比增长约65%，原因是期内业务收入增长。'
 
     test = npc.run(trend=trend, volatility=volatility, active_level=active_level, news=news)
 

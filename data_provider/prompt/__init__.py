@@ -1,10 +1,11 @@
-from data_provider.data import PriceData, NewsData, FutureDeliveryDateData, HolidayDateData
-from data_provider import to_pivot
+from ..data import PriceData, NewsData, FutureDeliveryDateData, HolidayDateData
+from .. import to_pivot
 
-from prompt.rule import TrendRule, VolatilityRule, ActiveLevelRule, DeliveryDayRule, HolidayRule
+from Arcadia.prompt.rule import TrendRule, VolatilityRule, ActiveLevelRule, DeliveryDayRule, HolidayRule
 from .state import get_trend_and_volatility_state, get_turnover_state, get_date_states
 
 import pandas as pd
+import numpy as np
 from chinese_calendar import get_holidays
 from datetime import datetime as dt
 
@@ -97,19 +98,21 @@ class PromptInformation:
 
         selected = news_df.loc[last_date: date]
         if not self.multiple_news:
-            news = selected.iloc[0]['body'] if len(selected) > 0 else '没有新闻.'
+            title = selected.iloc[0]['title'] if len(selected) > 0 else '没有新闻'
+            body = selected.iloc[0]['body'] if len(selected) > 0 else '没有新闻.'
         else:
             pass  #TODO
-        return news, len(selected), company, date
+        return title, body, len(selected), company, date
 
 
     def __getitem__(self, idx):
-        assert isinstance(idx, int) and idx < len(self)
+        assert isinstance(idx, int|np.int64) and idx < len(self)
         
         # 当前市场状态
         info_dict = self._get_info_at(idx)
-        news, num_candi_news, company, date = self._get_news_at(idx)
-        info_dict['news'] = news
+        title, body, num_candi_news, company, date = self._get_news_at(idx)
+        info_dict['title'] = title
+        info_dict['body'] = body
 
         # 需要预测的市场状态
         target_dict = self._get_info_at(idx+self.window_size*len(self.company))
