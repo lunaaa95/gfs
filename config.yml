@@ -1,0 +1,14 @@
+# 网络代理
+proxy: http://localhost:7890
+
+# OpenAI设置
+openai:
+    api-key: 
+    model: gpt-3.5-turbo
+    temperature: 0.3
+
+# json接口
+json:
+    time-series: json/ts.json
+    news: json/news.json
+    result: json/result.json
